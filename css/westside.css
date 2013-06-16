@@ -1,0 +1,26 @@
+p {
+  font-family: 'Lato';
+  font-weight: 300;
+  font-size: 22px;
+}
+img.logo {
+  margin-left: 20px;
+}
+.alert p {
+  font-size: 18px;
+}
+p a {
+  color: #2980b9;
+}
+p a:hover {
+  color: #3498db;
+}
+#introduction {
+  height: 150px;
+}
+.shark {
+  fill: #2980b9;
+}
+.jet {
+  fill: #d35400;
+}
