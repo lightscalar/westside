@@ -9,13 +9,21 @@
       replace: true,
       template: '<div id="introduction"></div>',
       link: function(scope, element, attrs) {
-        var R2, distance, height, i, kdtree, maxNeighbors, nearestNeighbors, nodeClick, nodes, numMembers, p, players, quadTree, rVisual, radius, setSpeed, svg, tick, width, _i;
+        var R2, dblClick, distance, height, i, kdtree, maxNeighbors, nTick, nearestNeighbors, nodeClick, nodes, numMembers, p, players, rVisual, radius, resetSim, setSpeed, shouldWeStop, svg, tick, width, _i;
+        shouldWeStop = true;
+        resetSim = false;
         height = $(element).height();
         width = $(element).width();
         radius = 3;
         R2 = radius * radius;
-        rVisual = 100;
+        rVisual = 30;
         maxNeighbors = 15;
+        Array.prototype.remove = function(e) {
+          var t, _ref;
+          if ((t = this.indexOf(e)) > -1) {
+            return ([].splice.apply(this, [t, t - t + 1].concat(_ref = [])), _ref);
+          }
+        };
         setSpeed = function(p, targetSpeed) {
           var norm;
           norm = Math.sqrt(p.vx * p.vx + p.vy * p.vy);
@@ -36,10 +44,9 @@
             vy: Math.random(),
             gang: Math.round(Math.random())
           };
-          p = setSpeed(p, 5);
+          p = setSpeed(p, 2);
           players.push(p);
         }
-        quadTree = d3.geom.quadtree(players);
         kdtree = new kdTree(players, distance, ['x', 'y']);
         nearestNeighbors = function(kdtree, node, R) {
           var neighbors;
@@ -47,9 +54,16 @@
           return neighbors;
         };
         nodeClick = function(node) {
-          return d3.timer(tick);
+          shouldWeStop = !shouldWeStop;
+          if (!shouldWeStop) {
+            return d3.timer(tick);
+          }
         };
-        svg = d3.select('#introduction').insert('svg:svg').on('click', nodeClick);
+        dblClick = function() {
+          resetSim = true;
+          return d3.event.stopPropagation();
+        };
+        svg = d3.select('#introduction').insert('svg:svg').on('click', nodeClick).on('dblclick', dblClick);
         nodes = svg.selectAll('circle').data(players);
         nodes.enter().insert('circle').attr('cx', function(d) {
           return d.x;
@@ -62,10 +76,22 @@
             return 'jet';
           }
         }).attr('r', radius);
+        nodes.exit().remove;
+        nTick = 0;
         tick = function() {
-          var D2, centroidForceX, centroidForceY, coefs, cx, cy, directionForceX, directionForceY, enemies, friends, inertiaX, inertiaY, neighbor, neighbors, numEnemies, numFriends, numNeighbors, randomX, randomY, repulseX, repulseY, rx, ry, _j, _k, _len, _len1;
-          for (_j = 0, _len = players.length; _j < _len; _j++) {
-            p = players[_j];
+          var D2, centroidForceX, centroidForceY, coefs, cx, cy, directionForceX, directionForceY, enemies, friends, inertiaX, inertiaY, neighbor, neighbors, numEnemies, numFriends, numNeighbors, randomX, randomY, repulseX, repulseY, rx, ry, _j, _k, _l, _len, _len1, _len2;
+          if (resetSim) {
+            for (_j = 0, _len = players.length; _j < _len; _j++) {
+              p = players[_j];
+              p.x = radius + Math.round(Math.random() * (width - 2 * radius));
+              p.y = radius + Math.round(Math.random() * (height - 2 * radius));
+            }
+            shouldWeStop = true;
+            resetSim = false;
+          }
+          nTick += 1;
+          for (_k = 0, _len1 = players.length; _k < _len1; _k++) {
+            p = players[_k];
             cx = width / 2 - p.x;
             cy = height / 2 - p.y;
             neighbors = nearestNeighbors(kdtree, p, rVisual);
@@ -90,8 +116,8 @@
               rx: 0,
               ry: 0
             };
-            for (_k = 0, _len1 = neighbors.length; _k < _len1; _k++) {
-              neighbor = neighbors[_k];
+            for (_l = 0, _len2 = neighbors.length; _l < _len2; _l++) {
+              neighbor = neighbors[_l];
               D2 = neighbor[1] * neighbor[1];
               if (neighbor[0].gang === p.gang) {
                 numFriends += 1;
@@ -99,7 +125,7 @@
                 friends.mvy += neighbor[0].vy;
                 friends.mx += neighbor[0].x;
                 friends.my += neighbor[0].y;
-                if (neighbor[1] < 2 * radius) {
+                if (neighbor[1] < 1.25 * radius) {
                   friends.rx += -(neighbor[0].x - p.x);
                   friends.ry += -(neighbor[0].y - p.y);
                 }
@@ -152,14 +178,14 @@
             randomX = coefs[3] * (Math.random() - 0.5);
             if (numFriends > 0) {
               centroidForceY = coefs[0] * (friends.my - p.y);
-              directionForceY = coefs[1] * (friends.mvy - p.vy);
+              directionForceY = coefs[1] * friends.mvy;
               repulseY = coefs[4] * friends.ry;
             }
             if (numEnemies > 0) {
               repulseY += coefs[5] * enemies.ry;
             }
             inertiaY = coefs[2] * p.vy;
-            randomY = coefs[4] * (Math.random() - 0.5);
+            randomY = coefs[3] * (Math.random() - 0.5);
             p.vx = inertiaX + centroidForceX + directionForceX + randomX + repulseX;
             p.vy = inertiaY + centroidForceY + directionForceY + randomY + repulseY;
             p = setSpeed(p, 2 + (maxNeighbors - numFriends) * 2.0 / maxNeighbors);
@@ -185,7 +211,10 @@
           }).attr('cy', function(d) {
             return d.y;
           });
-          return false;
+          if (nTick % 1 === 0) {
+            kdtree = new kdTree(players, distance, ['x', 'y']);
+          }
+          return shouldWeStop;
         };
         return window.points = players;
       }

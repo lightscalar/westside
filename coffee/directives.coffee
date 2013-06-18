@@ -6,12 +6,16 @@
   replace: true,
   template: '<div id="introduction"></div>',
   link: (scope, element, attrs) ->
+    shouldWeStop = true
+    resetSim = false
     height = $(element).height()
     width = $(element).width()
     radius = 3
     R2 = radius * radius
-    rVisual = 100
+    rVisual = 30
     maxNeighbors = 15
+
+    Array::remove = (e) -> @[t..t] = [] if (t = @indexOf(e)) > -1
 
     # Preserves the direction of the agent, but adjusts speed to targetSpeed.
     setSpeed = (p, targetSpeed) ->
@@ -35,11 +39,10 @@
         vx: Math.random()
         vy: Math.random()
         gang: Math.round(Math.random())
-      p = setSpeed(p, 5)
+      p = setSpeed(p, 2)
       players.push p
 
     # Create a quadtree.
-    quadTree = d3.geom.quadtree(players)
     kdtree = new kdTree(players, distance, ['x', 'y'])
 
     nearestNeighbors = (kdtree, node, R) ->
@@ -47,22 +50,38 @@
       return neighbors
 
     nodeClick = (node) ->
-      # for p in players
-      #   console.log p
-      #   friends = nearestNeighbors(kdtree, p, 50)
-      #   console.log friends
-      # console.log 'Number neighbors: ', friends.length-1
-      d3.timer(tick)
+      shouldWeStop = !shouldWeStop
+      if !shouldWeStop
+        d3.timer(tick)
 
-    svg = d3.select('#introduction').insert('svg:svg').on('click', nodeClick)
+    dblClick = ->
+      resetSim = true
+      d3.event.stopPropagation()
+
+
+    svg = d3.select('#introduction').insert('svg:svg')
+            .on('click', nodeClick)
+            .on('dblclick', dblClick)
     nodes = svg.selectAll('circle').data(players)
     nodes.enter().insert('circle')
       .attr('cx', (d) -> d.x)
       .attr('cy', (d) -> d.y)
       .attr('class', (d) -> if d.gang then 'shark' else 'jet')
       .attr('r', radius)
+    nodes.exit().remove
+
+    nTick = 0
 
     tick = ->
+
+      if resetSim
+        for p in players
+          p.x = radius + Math.round(Math.random() * (width-2*radius))
+          p.y = radius + Math.round(Math.random() * (height-2*radius))
+        shouldWeStop = true
+        resetSim = false
+
+      nTick += 1
       for p in players
         cx = width/2 - p.x
         cy = height/2 - p.y
@@ -97,7 +116,7 @@
             friends.mvy += neighbor[0].vy
             friends.mx += neighbor[0].x
             friends.my += neighbor[0].y
-            if neighbor[1] < 2*radius
+            if neighbor[1] < 1.25*radius
               friends.rx += -(neighbor[0].x - p.x) # (neighbor[0].x - p.x) * Math.exp(-D2/(25*R2))
               friends.ry += -(neighbor[0].y - p.y)
           else
@@ -139,8 +158,8 @@
         repulseY = 0
 
         if numFriends > 0
-          centroidForceX = coefs[0] * ( (friends.mx - p.x))
-          directionForceX = coefs[1] * ( (friends.mvx))
+          centroidForceX = coefs[0] * (friends.mx - p.x)
+          directionForceX = coefs[1] * (friends.mvx)
           repulseX = coefs[4] * friends.rx
         if numEnemies > 0
           repulseX += coefs[5] * enemies.rx
@@ -149,12 +168,12 @@
 
         if numFriends > 0
           centroidForceY = coefs[0]   * (friends.my - p.y)
-          directionForceY = coefs[1]  * (friends.mvy - p.vy)
+          directionForceY = coefs[1]  * (friends.mvy)
           repulseY = coefs[4] * friends.ry
         if numEnemies > 0
           repulseY += coefs[5] * enemies.ry
         inertiaY = coefs[2] * (p.vy)
-        randomY = coefs[4] * (Math.random() - 0.5)
+        randomY = coefs[3] * (Math.random() - 0.5)
 
         p.vx = inertiaX + centroidForceX + directionForceX + randomX + repulseX
         p.vy = inertiaY + centroidForceY + directionForceY + randomY + repulseY
@@ -180,11 +199,13 @@
           p.vy = -1 * Math.abs(p.vy)
           p.y = height-radius
 
-
       d3.selectAll('circle')
         .attr('cx', (d) -> d.x)
         .attr('cy', (d) -> d.y)
-      return false
+
+      if nTick % 1 == 0
+        kdtree = new kdTree(players, distance, ['x', 'y'])
+      return shouldWeStop
 
     window.points = players
 

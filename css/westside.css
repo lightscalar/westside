@@ -16,11 +16,15 @@ p a:hover {
   color: #3498db;
 }
 #introduction {
-  height: 150px;
+  height: 420px;
+  border: 1px solid #efefef;
 }
 .shark {
   fill: #2980b9;
 }
 .jet {
   fill: #d35400;
+}
+.caption {
+  font-size: 14px;
 }

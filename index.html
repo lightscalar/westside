@@ -3,10 +3,11 @@
   <head>
     <title>Westside</title>
     <link rel="icon" href="images/favicon.png">
-    <script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
+    <script src="js/d3.v3.min.js" charset="utf-8"></script>
     <link href='http://fonts.googleapis.com/css?family=Lato:300' rel='stylesheet' type='text/css'>
     <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.1.5/angular.min.js"></script>
     <script src="js/kdTree.min.js"></script>
+    <script src="coffee/utils.js"></script>
     <script src="coffee/directives.js"></script>
     <script src="coffee/westside.js"></script>
 
@@ -63,11 +64,58 @@
             </p>
           </div>
         </div>
+
+      </div>
+
+      <div class='row'>
+        <div class='span6'>
+          <h4>Movement</h4>
+          <p>
+
+            Gang members exhibit <a
+            href='http://en.wikipedia.org/wiki/Flocking_(behavior)'>
+            flocking</a> behavior, as demonstrated by the simulation at the
+            right. Agents instinctively seek friendly gang members and avoid
+            enemies. They move in the same direction as the members of their
+            local gang, and tend to move toward the center of the gang. But
+            they also have a sense of personal space &mdash; they will not get too
+            close to their fellow gang members.
+
+          </p>
+
+          <p>
+
+            The smaller the gang, the faster it moves &mdash; large gangs move at
+            half the speed of individuals. But being in a large group does
+            confer certain advantages in the dangerous world of Westside.
+
+          </p>
+
+        </div>
         <div class='span6'>
           <div introduction></div>
+          <p class='caption'>Click to start or pause the simulation. Double click to reset.</p>
         </div>
       </div>
-    </div>
+
+      <div class='row'>
+        <div class='span6'>
+          <h4>Anatomy of a Jet</h4>
+          <p>
+            Let's look closer at the abilities of the agents.
+
+
+          </p>
+        </div>
+      </div>
+
+    </div> <!-- Container -->
+
+    <br><br><br>
+
+
+
+
 
     <!-- Load JS here for greater good =============================-->
     <script src="js/jquery-1.8.3.min.js"></script>
