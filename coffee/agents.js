@@ -49,21 +49,37 @@
     };
 
     Agent.prototype.state = function() {
-      return [Math.floor(this.x / this.width * (this.discretization - 1)), Math.floor(this.y / this.height * (this.discretization - 1))];
+      return [Math.floor(this.x / this.width * (this.discretization - 1)), Math.floor(this.y / this.height * (this.discretization - 1)), this.gang];
     };
 
     Agent.prototype.reward = function() {
-      var pos, target;
+      var jetTarget, pos, sharkTarget;
       pos = {
         x: this.x,
         y: this.y
       };
-      target = {
-        x: this.width * 0.50,
+      jetTarget = {
+        x: this.width * 0.75,
         y: this.height * 0.5
       };
-      if (distance(pos, target) < 100) {
-        return 100;
+      sharkTarget = {
+        x: this.width * 0.25,
+        y: this.height * 0.5
+      };
+      if (distance(pos, sharkTarget) < 100) {
+        switch (this.gang) {
+          case 0:
+            return -100;
+          case 1:
+            return 100;
+        }
+      } else if (distance(pos, jetTarget) < 100) {
+        switch (this.gang) {
+          case 0:
+            return 100;
+          case 1:
+            return -100;
+        }
       } else {
         return -1;
       }

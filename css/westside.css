@@ -24,6 +24,18 @@ p a:hover {
 .jet {
   fill: #d35400;
 }
+.sharks {
+  fill: #2980b9;
+  opacity: 0.4;
+  stroke: none;
+  stroke-width: 0;
+}
+.jets {
+  fill: #d35400;
+  opacity: 0.4;
+  stroke: none;
+  stroke-width: 0;
+}
 .caption {
   font-size: 14px;
 }

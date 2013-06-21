@@ -15,12 +15,13 @@
         numAgents = 50;
         stopSimulation = true;
         alpha = 0.6;
-        epsilon = 0.05;
+        epsilon = 0.1;
         agents = [];
-        Q = new Learn([30, 30], 5);
+        Q = new Learn([30, 30, 2], 5);
         tree = new kdTree(agents, distance, ['x', 'y']);
         svg = d3.select('#westside').insert('svg:svg').attr('width', width).attr('height', height);
-        svg.append('circle').attr('cx', 0.5 * width).attr('cy', 0.5 * height).attr('r', 100).attr('stroke', '#7f8c8d').attr('stroke-width', 2).attr('fill', '#efefef').attr('opacity', 0.8);
+        svg.append('circle').attr('class', 'jets').attr('cx', 0.75 * width).attr('cy', 0.5 * height).attr('r', 100).attr('stroke', '#7f8c8d').attr('stroke-width', 2).attr('fill', '#efefef').attr('opacity', 0.8);
+        svg.append('circle').attr('class', 'sharks').attr('cx', 0.25 * width).attr('cy', 0.5 * height).attr('r', 100).attr('stroke', '#7f8c8d').attr('stroke-width', 2).attr('fill', '#efefef').attr('opacity', 0.8);
         agent = svg.selectAll('circle.agent');
         dragmove = function() {
           return d3.select(this).attr('cx', function(d) {

@@ -13,10 +13,10 @@
     numAgents = 50
     stopSimulation = true
     alpha = 0.6
-    epsilon = 0.05
+    epsilon = 0.1
     agents = []
 
-    Q = new Learn([30, 30], 5)
+    Q = new Learn([30, 30, 2], 5)
 
     # Build the kd-tree.
     tree = new kdTree(agents, distance, ['x', 'y'])
@@ -28,7 +28,18 @@
 
     # Define a target.
     svg.append('circle')
-      .attr('cx', 0.5 * width)
+      .attr('class', 'jets')
+      .attr('cx', 0.75 * width)
+      .attr('cy', 0.5 * height)
+      .attr('r', 100)
+      .attr('stroke', '#7f8c8d')
+      .attr('stroke-width', 2)
+      .attr('fill', '#efefef')
+      .attr('opacity', 0.8)
+
+    svg.append('circle')
+      .attr('class', 'sharks')
+      .attr('cx', 0.25 * width)
       .attr('cy', 0.5 * height)
       .attr('r', 100)
       .attr('stroke', '#7f8c8d')
@@ -46,6 +57,7 @@
 
     drag = d3.behavior.drag()
         .on("drag", dragmove);
+
 
     redraw = ->
       # Add circles to represent each agent.
@@ -69,6 +81,7 @@
       window.tree = tree
       redraw()
 
+
     tick = ->
       # Update position of agents in the simulation.
       for a in agents
@@ -78,10 +91,12 @@
         a.update()
         newState = a.state()
         Q.update(selectedAction, oldState, newState, a.reward())
+        # if a.reward() > 0 then console.log a.reward()
       svg.selectAll('circle.agent')
         .attr('cx', (d) -> d.x)
         .attr('cy', (d) -> d.y)
       return stopSimulation
+
 
     toggleSimulation = ->
       stopSimulation = !stopSimulation

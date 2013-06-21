@@ -1,6 +1,6 @@
 @Learn = class Learn
 
-  constructor: (@nStates, @nActions, @gamma = 0.5, @alpha = 0.6) ->
+  constructor: (@nStates, @nActions, @gamma = 1.0, @alpha = 0.6) ->
     @Q = []
     for actionIter in [0...@nActions]
       state = zeros(@nStates.length)
@@ -13,12 +13,13 @@
 
   incrementState: (state) ->
     for i in [0...state.length]
-      if state[i] < @nStates[i]
+      if state[i] < (@nStates[i] - 1)
         state[i] += 1
         for j in [0...i]
           state[j] = 0
         return state
     return state
+
 
   maxAction: (state) ->
     bestFitness = -Infinity
@@ -35,7 +36,7 @@
       @Q[actionTaken][oldState] += @alpha * (reward + @gamma * bestQ - @Q[actionTaken][oldState])
     catch error
       console.log 'Error'
-      console.log actionTaken, oldState[0], oldState[1], reward
+      console.log 'The action take was: ', actionTaken
 
   # Epsilon greedy selection of available actions.
   selectAction: (state, epsilon=0) ->
@@ -47,6 +48,10 @@
         if @Q[action][state] > bestFitness
           bestAction = action
           bestFitness = @Q[action][state]
+      if bestAction < 0
+        window.Q = @Q
+        window.state = state
+        throw 'Hello no!'
       return bestAction
     else
       # Just select a random action.

@@ -8,7 +8,7 @@
       var actionIter, iter, state, stateMatrix, _i, _j, _ref, _ref1;
       this.nStates = nStates;
       this.nActions = nActions;
-      this.gamma = gamma != null ? gamma : 0.5;
+      this.gamma = gamma != null ? gamma : 1.0;
       this.alpha = alpha != null ? alpha : 0.6;
       this.Q = [];
       for (actionIter = _i = 0, _ref = this.nActions; 0 <= _ref ? _i < _ref : _i > _ref; actionIter = 0 <= _ref ? ++_i : --_i) {
@@ -25,7 +25,7 @@
     Learn.prototype.incrementState = function(state) {
       var i, j, _i, _j, _ref;
       for (i = _i = 0, _ref = state.length; 0 <= _ref ? _i < _ref : _i > _ref; i = 0 <= _ref ? ++_i : --_i) {
-        if (state[i] < this.nStates[i]) {
+        if (state[i] < (this.nStates[i] - 1)) {
           state[i] += 1;
           for (j = _j = 0; 0 <= i ? _j < i : _j > i; j = 0 <= i ? ++_j : --_j) {
             state[j] = 0;
@@ -54,7 +54,7 @@
         return this.Q[actionTaken][oldState] += this.alpha * (reward + this.gamma * bestQ - this.Q[actionTaken][oldState]);
       } catch (error) {
         console.log('Error');
-        return console.log(actionTaken, oldState[0], oldState[1], reward);
+        return console.log('The action take was: ', actionTaken);
       }
     };
 
@@ -71,6 +71,11 @@
             bestAction = action;
             bestFitness = this.Q[action][state];
           }
+        }
+        if (bestAction < 0) {
+          window.Q = this.Q;
+          window.state = state;
+          throw 'Hello no!';
         }
         return bestAction;
       } else {

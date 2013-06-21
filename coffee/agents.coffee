@@ -72,14 +72,23 @@
 
 
   state: ->
-    return [Math.floor(@x/@width * (@discretization-1)), Math.floor(@y/@height * (@discretization-1))]
+    return [Math.floor(@x/@width * (@discretization-1)), Math.floor(@y/@height * (@discretization-1)), @gang]
     # return {x: @x, y: @y, vx: @vx, vy: @vy, theta: @theta, thrust: @thrust}
 
   reward: ->
     pos = {x: @x, y: @y}
-    target = {x: @width * 0.50, y: @height* 0.5}
-    if distance(pos, target) < 100
-      return 100
+    jetTarget = {x: @width * 0.75, y: @height* 0.5}
+    sharkTarget = {x: @width * 0.25, y: @height* 0.5}
+    if distance(pos, sharkTarget) < 100
+      # console.log 'SHARK'
+      switch @gang
+        when 0 then return -100
+        when 1 then return 100
+    else if distance(pos, jetTarget) < 100
+      # console.log 'JET'
+      switch @gang
+        when 0 then return 100
+        when 1 then return -100
     else
       return -1
 
