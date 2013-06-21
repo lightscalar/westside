@@ -156,6 +156,28 @@ unless Array::contains
     else
       return false
 
+# Define distance function (2-norm).
+@distance = (p1, p2) ->
+  Math.sqrt(Math.pow(p1.x - p2.x, 2) + Math.pow(p1.y - p2.y, 2))
+
+# The sgn function -- returns the sign of a number (i.e. +1 or -1)
+@sgn = (x) ->
+  if Math.abs(x) > 0 then x/Math.abs(x) else 1
+
+# Draw sample from a discrete distribution.
+@drawSample = (distribution) ->
+  N = distribution.length
+  if distribution.sum() == 0 then distribution = ones(N)
+  distribution = distribution.normalize()
+  u = Math.random()
+  csum = 0
+  for idx in [0...distribution.length]
+    csum += distribution[idx]
+    if u < csum
+      return idx
+  return N-1
+
+
 
 
 

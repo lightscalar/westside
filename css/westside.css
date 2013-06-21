@@ -15,9 +15,8 @@ p a {
 p a:hover {
   color: #3498db;
 }
-#introduction {
-  height: 420px;
-  border: 1px solid #efefef;
+.westside {
+  border: 1px solid #cfcfcf;
 }
 .shark {
   fill: #2980b9;
