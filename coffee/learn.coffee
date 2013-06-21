@@ -1,19 +1,19 @@
 @Learn = class Learn
 
-  constructor: (@nStates, @nActions, @gamma = 1.0, @alpha = 0.6, @lambda = 0.9) ->
+  constructor: (@nStates, @nActions, @gamma = 0.6, @alpha = 0.6, @lambda = 0.7) ->
     @Q = []
-    @E = []
+    # @E = []
     @stateActionList = []
     for actionIter in [0...@nActions]
       state = zeros(@nStates.length)
       stateMatrix = {}
-      eligibilityMatrix = {}
+      # eligibilityMatrix = {}
       for iter in [0... @nStates.prod()]
         stateMatrix[state] = 10 * Math.random()
-        eligibilityMatrix[state] = 0
+        # eligibilityMatrix[state] = 0
         state = @incrementState(state)
       @Q.push stateMatrix
-      @E.push eligibilityMatrix
+      # @E.push eligibilityMatrix
 
 
   incrementState: (state) ->
@@ -36,8 +36,8 @@
 
   # Maintain the state/action list
   addToUpdateList: (action, state) ->
-    if @stateActionList.length > 100
-      L = @stateActionList.length - 100
+    if @stateActionList.length > 300
+      L = @stateActionList.length - 300
       @stateActionList = @stateActionList[L..]
     @stateActionList.push {action: action, state: state}
 
@@ -45,7 +45,7 @@
 
   # Update our Q function using SARSA w/ eligibility traces.
   sarsa: (actionTaken, oldState, newState, reward) ->
-    newAction = @selectAction(newState)
+    newAction = @selectAction(newState, 0.05)
     delta = reward + @gamma * @Q[newAction][newState] - @Q[actionTaken][oldState]
     @E[actionTaken][oldState] += 1
     @addToUpdateList(actionTaken, oldState)

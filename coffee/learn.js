@@ -5,26 +5,22 @@
   this.Learn = Learn = (function() {
 
     function Learn(nStates, nActions, gamma, alpha, lambda) {
-      var actionIter, eligibilityMatrix, iter, state, stateMatrix, _i, _j, _ref, _ref1;
+      var actionIter, iter, state, stateMatrix, _i, _j, _ref, _ref1;
       this.nStates = nStates;
       this.nActions = nActions;
-      this.gamma = gamma != null ? gamma : 1.0;
+      this.gamma = gamma != null ? gamma : 0.6;
       this.alpha = alpha != null ? alpha : 0.6;
-      this.lambda = lambda != null ? lambda : 0.9;
+      this.lambda = lambda != null ? lambda : 0.7;
       this.Q = [];
-      this.E = [];
       this.stateActionList = [];
       for (actionIter = _i = 0, _ref = this.nActions; 0 <= _ref ? _i < _ref : _i > _ref; actionIter = 0 <= _ref ? ++_i : --_i) {
         state = zeros(this.nStates.length);
         stateMatrix = {};
-        eligibilityMatrix = {};
         for (iter = _j = 0, _ref1 = this.nStates.prod(); 0 <= _ref1 ? _j < _ref1 : _j > _ref1; iter = 0 <= _ref1 ? ++_j : --_j) {
           stateMatrix[state] = 10 * Math.random();
-          eligibilityMatrix[state] = 0;
           state = this.incrementState(state);
         }
         this.Q.push(stateMatrix);
-        this.E.push(eligibilityMatrix);
       }
     }
 
@@ -55,8 +51,8 @@
 
     Learn.prototype.addToUpdateList = function(action, state) {
       var L;
-      if (this.stateActionList.length > 100) {
-        L = this.stateActionList.length - 100;
+      if (this.stateActionList.length > 300) {
+        L = this.stateActionList.length - 300;
         this.stateActionList = this.stateActionList.slice(L);
       }
       return this.stateActionList.push({
@@ -67,7 +63,7 @@
 
     Learn.prototype.sarsa = function(actionTaken, oldState, newState, reward) {
       var delta, newAction, q, _i, _len, _ref;
-      newAction = this.selectAction(newState);
+      newAction = this.selectAction(newState, 0.05);
       delta = reward + this.gamma * this.Q[newAction][newState] - this.Q[actionTaken][oldState];
       this.E[actionTaken][oldState] += 1;
       this.addToUpdateList(actionTaken, oldState);

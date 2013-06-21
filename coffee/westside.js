@@ -15,7 +15,7 @@
         numAgents = 50;
         stopSimulation = true;
         alpha = 0.6;
-        epsilon = 0.1;
+        epsilon = 0.01;
         agents = [];
         Q = new Learn([30, 30, 2], 5);
         tree = new kdTree(agents, distance, ['x', 'y']);
@@ -64,9 +64,10 @@
           for (_i = 0, _len = agents.length; _i < _len; _i++) {
             a = agents[_i];
             oldState = a.state();
-            selectedAction = a.takeNextAction();
+            selectedAction = Q.selectAction(oldState, epsilon);
+            a.takeAction(selectedAction);
             newState = a.update();
-            a.nextAction = Q.sarsa(selectedAction, oldState, newState, a.reward());
+            Q.update(selectedAction, oldState, newState, a.reward());
           }
           svg.selectAll('circle.agent').attr('cx', function(d) {
             return d.x;
