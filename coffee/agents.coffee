@@ -19,6 +19,9 @@
     @mu = 6e-2
     @discretization = 30
 
+    @nextAction = Math.round(4 * Math.random())
+    @lastAction = -1
+
 
     # Calculate the mass of the agent, based on its size (constant areal density).
     @mass = 0.2 * @radius
@@ -42,6 +45,11 @@
     # Set the agent's thrust to zero.
     @horzThrust = 0
     @vertThrust = 0
+
+  takeNextAction: ->
+    @takeAction(@nextAction)
+    @lastAction = @nextAction
+    return @nextAction
 
   takeAction: (action = null) ->
     # Take one of the four possible actions:
@@ -129,6 +137,8 @@
     else if @y > @height - @radius
       @y = @height - @radius
       @vy = -1 * Math.abs(@vy)
+
+    return @state()
 
 
 

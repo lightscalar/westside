@@ -1,14 +1,19 @@
 @Learn = class Learn
 
-  constructor: (@nStates, @nActions, @gamma = 1.0, @alpha = 0.6) ->
+  constructor: (@nStates, @nActions, @gamma = 1.0, @alpha = 0.6, @lambda = 0.9) ->
     @Q = []
+    @E = []
+    @stateActionList = []
     for actionIter in [0...@nActions]
       state = zeros(@nStates.length)
       stateMatrix = {}
+      eligibilityMatrix = {}
       for iter in [0... @nStates.prod()]
         stateMatrix[state] = 10 * Math.random()
+        eligibilityMatrix[state] = 0
         state = @incrementState(state)
       @Q.push stateMatrix
+      @E.push eligibilityMatrix
 
 
   incrementState: (state) ->
@@ -29,6 +34,27 @@
     return bestFitness
 
 
+  # Maintain the state/action list
+  addToUpdateList: (action, state) ->
+    if @stateActionList.length > 100
+      L = @stateActionList.length - 100
+      @stateActionList = @stateActionList[L..]
+    @stateActionList.push {action: action, state: state}
+
+
+
+  # Update our Q function using SARSA w/ eligibility traces.
+  sarsa: (actionTaken, oldState, newState, reward) ->
+    newAction = @selectAction(newState)
+    delta = reward + @gamma * @Q[newAction][newState] - @Q[actionTaken][oldState]
+    @E[actionTaken][oldState] += 1
+    @addToUpdateList(actionTaken, oldState)
+    for q in @stateActionList
+      @Q[q.action][q.state] += @alpha * delta * @E[q.action][q.state]
+      @E[q.action][q.state] = @gamma * @lambda * @E[q.action][q.state]
+    return newAction
+
+
   # Update our Q function based on the observations
   update: (actionTaken, oldState, newState, reward) ->
     bestQ = @maxAction(newState)
@@ -36,7 +62,7 @@
       @Q[actionTaken][oldState] += @alpha * (reward + @gamma * bestQ - @Q[actionTaken][oldState])
     catch error
       console.log 'Error'
-      console.log 'The action take was: ', actionTaken
+      console.log 'The action taken was: ', actionTaken
 
   # Epsilon greedy selection of available actions.
   selectAction: (state, epsilon=0) ->

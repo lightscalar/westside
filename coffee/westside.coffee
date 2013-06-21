@@ -86,12 +86,12 @@
       # Update position of agents in the simulation.
       for a in agents
         oldState = a.state()
-        selectedAction = Q.selectAction(oldState, epsilon)
-        a.takeAction(selectedAction)
-        a.update()
-        newState = a.state()
-        Q.update(selectedAction, oldState, newState, a.reward())
-        # if a.reward() > 0 then console.log a.reward()
+        selectedAction = a.takeNextAction()
+        # a.takeAction(selectedAction)
+        newState = a.update()
+        a.nextAction = Q.sarsa(selectedAction, oldState, newState, a.reward())
+
+      # Draw the new position of the agent on the canvas.
       svg.selectAll('circle.agent')
         .attr('cx', (d) -> d.x)
         .attr('cy', (d) -> d.y)

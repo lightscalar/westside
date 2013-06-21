@@ -14,6 +14,8 @@
       this.dtheta = Math.PI / 16;
       this.mu = 6e-2;
       this.discretization = 30;
+      this.nextAction = Math.round(4 * Math.random());
+      this.lastAction = -1;
       this.mass = 0.2 * this.radius;
       this.x = this.radius + Math.round(Math.random() * (this.width - 2 * this.radius));
       this.y = this.radius + Math.round(Math.random() * (this.height - 2 * this.radius));
@@ -25,6 +27,12 @@
       this.horzThrust = 0;
       this.vertThrust = 0;
     }
+
+    Agent.prototype.takeNextAction = function() {
+      this.takeAction(this.nextAction);
+      this.lastAction = this.nextAction;
+      return this.nextAction;
+    };
 
     Agent.prototype.takeAction = function(action) {
       if (action == null) {
@@ -101,11 +109,12 @@
       }
       if (this.y < this.radius) {
         this.y = this.radius;
-        return this.vy = Math.abs(this.vy);
+        this.vy = Math.abs(this.vy);
       } else if (this.y > this.height - this.radius) {
         this.y = this.height - this.radius;
-        return this.vy = -1 * Math.abs(this.vy);
+        this.vy = -1 * Math.abs(this.vy);
       }
+      return this.state();
     };
 
     return Agent;

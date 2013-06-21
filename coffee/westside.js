@@ -64,11 +64,9 @@
           for (_i = 0, _len = agents.length; _i < _len; _i++) {
             a = agents[_i];
             oldState = a.state();
-            selectedAction = Q.selectAction(oldState, epsilon);
-            a.takeAction(selectedAction);
-            a.update();
-            newState = a.state();
-            Q.update(selectedAction, oldState, newState, a.reward());
+            selectedAction = a.takeNextAction();
+            newState = a.update();
+            a.nextAction = Q.sarsa(selectedAction, oldState, newState, a.reward());
           }
           svg.selectAll('circle.agent').attr('cx', function(d) {
             return d.x;

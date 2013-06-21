@@ -4,21 +4,27 @@
 
   this.Learn = Learn = (function() {
 
-    function Learn(nStates, nActions, gamma, alpha) {
-      var actionIter, iter, state, stateMatrix, _i, _j, _ref, _ref1;
+    function Learn(nStates, nActions, gamma, alpha, lambda) {
+      var actionIter, eligibilityMatrix, iter, state, stateMatrix, _i, _j, _ref, _ref1;
       this.nStates = nStates;
       this.nActions = nActions;
       this.gamma = gamma != null ? gamma : 1.0;
       this.alpha = alpha != null ? alpha : 0.6;
+      this.lambda = lambda != null ? lambda : 0.9;
       this.Q = [];
+      this.E = [];
+      this.stateActionList = [];
       for (actionIter = _i = 0, _ref = this.nActions; 0 <= _ref ? _i < _ref : _i > _ref; actionIter = 0 <= _ref ? ++_i : --_i) {
         state = zeros(this.nStates.length);
         stateMatrix = {};
+        eligibilityMatrix = {};
         for (iter = _j = 0, _ref1 = this.nStates.prod(); 0 <= _ref1 ? _j < _ref1 : _j > _ref1; iter = 0 <= _ref1 ? ++_j : --_j) {
           stateMatrix[state] = 10 * Math.random();
+          eligibilityMatrix[state] = 0;
           state = this.incrementState(state);
         }
         this.Q.push(stateMatrix);
+        this.E.push(eligibilityMatrix);
       }
     }
 
@@ -47,6 +53,33 @@
       return bestFitness;
     };
 
+    Learn.prototype.addToUpdateList = function(action, state) {
+      var L;
+      if (this.stateActionList.length > 100) {
+        L = this.stateActionList.length - 100;
+        this.stateActionList = this.stateActionList.slice(L);
+      }
+      return this.stateActionList.push({
+        action: action,
+        state: state
+      });
+    };
+
+    Learn.prototype.sarsa = function(actionTaken, oldState, newState, reward) {
+      var delta, newAction, q, _i, _len, _ref;
+      newAction = this.selectAction(newState);
+      delta = reward + this.gamma * this.Q[newAction][newState] - this.Q[actionTaken][oldState];
+      this.E[actionTaken][oldState] += 1;
+      this.addToUpdateList(actionTaken, oldState);
+      _ref = this.stateActionList;
+      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+        q = _ref[_i];
+        this.Q[q.action][q.state] += this.alpha * delta * this.E[q.action][q.state];
+        this.E[q.action][q.state] = this.gamma * this.lambda * this.E[q.action][q.state];
+      }
+      return newAction;
+    };
+
     Learn.prototype.update = function(actionTaken, oldState, newState, reward) {
       var bestQ;
       bestQ = this.maxAction(newState);
@@ -54,7 +87,7 @@
         return this.Q[actionTaken][oldState] += this.alpha * (reward + this.gamma * bestQ - this.Q[actionTaken][oldState]);
       } catch (error) {
         console.log('Error');
-        return console.log('The action take was: ', actionTaken);
+        return console.log('The action taken was: ', actionTaken);
       }
     };
 
